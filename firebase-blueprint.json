@@ -1,0 +1,443 @@
+{
+  "entities": {
+    "InstitutionConfig": {
+      "title": "InstitutionConfig",
+      "description": "Public non-PII first-time setup status and school identity record.",
+      "type": "object",
+      "properties": {
+        "setupComplete": { "type": "boolean" },
+        "superAdminUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "schoolName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "schoolCode": { "type": "string", "minLength": 2, "maxLength": 24, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "schoolAddress": { "type": "string", "minLength": 3, "maxLength": 240 },
+        "schoolOwner": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "ownerUsername": { "type": "string", "minLength": 3, "maxLength": 48, "pattern": "^[a-zA-Z0-9._\\-]+$" },
+        "emailOtpVerified": { "type": "boolean" },
+        "phoneOtpVerified": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["setupComplete", "superAdminUid", "schoolName", "schoolCode", "schoolAddress", "schoolOwner", "ownerUsername", "emailOtpVerified", "phoneOtpVerified", "createdAt", "updatedAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Role-based account metadata without raw PII.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 48 },
+        "role": { "type": "string", "enum": ["super_admin", "admin", "board", "teacher", "staff", "student"] },
+        "schoolName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "department": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "avatarUrl": { "type": "string", "maxLength": 300 },
+        "accountStatus": { "type": "string", "enum": ["active", "suspended"] },
+        "seeded": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "ownerId", "displayName", "username", "role", "schoolName", "department", "avatarUrl", "accountStatus", "seeded", "createdAt", "updatedAt"]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "Isolated PII for an authenticated user (email, phone).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "phone": { "type": "string", "maxLength": 40 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "phone", "createdAt", "updatedAt"]
+    },
+    "AdminRegistry": {
+      "title": "AdminRegistry",
+      "description": "Trusted database record granting admin role to a user UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "grantedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "grantedBy", "createdAt"]
+    },
+    "RoleInvite": {
+      "title": "RoleInvite",
+      "description": "Audit log of Super Admin provisioned invite-only user accounts (no plaintext passwords).",
+      "type": "object",
+      "properties": {
+        "targetUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "fullName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "role": { "type": "string", "enum": ["admin", "board", "teacher", "staff", "student"] },
+        "department": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "status": { "type": "string", "enum": ["active", "revoked"] },
+        "createdByUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["targetUid", "fullName", "role", "department", "status", "createdByUid", "ownerId", "createdAt", "updatedAt"]
+    },
+    "ContactInquiry": {
+      "title": "ContactInquiry",
+      "description": "Public Contact Us inquiry submission readable only by school administrators.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "institutionName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "workEmail": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "phone": { "type": "string", "maxLength": 40 },
+        "topic": { "type": "string", "enum": ["Demo Request", "Admissions Suite", "District Rollout", "Technical Support", "Partnership"] },
+        "message": { "type": "string", "minLength": 5, "maxLength": 1500 },
+        "status": { "type": "string", "enum": ["new", "reviewed", "archived"] },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "institutionName", "workEmail", "phone", "topic", "message", "status", "ownerId", "createdAt", "updatedAt"]
+    },
+    "CareerApplication": {
+      "title": "CareerApplication",
+      "description": "Public Career page application readable only by school administrators.",
+      "type": "object",
+      "properties": {
+        "applicantName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "roleTitle": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "department": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "portfolioUrl": { "type": "string", "maxLength": 300 },
+        "coverNote": { "type": "string", "minLength": 10, "maxLength": 1500 },
+        "status": { "type": "string", "enum": ["submitted", "reviewing", "closed"] },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["applicantName", "email", "roleTitle", "department", "portfolioUrl", "coverNote", "status", "ownerId", "createdAt", "updatedAt"]
+    },
+    "SchoolClass": {
+      "title": "SchoolClass",
+      "description": "Homeroom or academic course section.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "code": { "type": "string", "minLength": 2, "maxLength": 24, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "gradeLevel": { "type": "string", "minLength": 1, "maxLength": 30 },
+        "room": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "scheduleSlot": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "teacherName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "teacherStaffId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "assignedTeacherId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "capacity": { "type": "number" },
+        "boardViewerUids": { "type": "array", "description": "Bounded list (<= 25) of active Board member UIDs granted read-only executive access." },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "code", "gradeLevel", "room", "scheduleSlot", "teacherName", "teacherStaffId", "assignedTeacherId", "capacity", "ownerId", "createdAt", "updatedAt"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Enrolled student record without raw guardian email/phone PII.",
+      "type": "object",
+      "properties": {
+        "firstName": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "lastName": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "studentCode": { "type": "string", "minLength": 2, "maxLength": 32, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "gradeLevel": { "type": "string", "minLength": 1, "maxLength": 30 },
+        "classId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "className": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "guardianName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "preferredChannel": { "type": "string", "enum": ["SMS", "Email", "App Push"] },
+        "enrollmentStatus": { "type": "string", "enum": ["active", "probation", "transferred", "graduated"] },
+        "attendanceRate": { "type": "number" },
+        "linkedUserUid": { "type": "string", "maxLength": 128 },
+        "boardViewerUids": { "type": "array", "description": "Bounded list (<= 25) of active Board member UIDs granted read-only executive access." },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "assignedTeacherId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["firstName", "lastName", "studentCode", "gradeLevel", "classId", "className", "guardianName", "preferredChannel", "enrollmentStatus", "attendanceRate", "linkedUserUid", "ownerId", "assignedTeacherId", "createdAt", "updatedAt"]
+    },
+    "StudentGuardianPrivate": {
+      "title": "StudentGuardianPrivate",
+      "description": "Isolated guardian contact PII for a student.",
+      "type": "object",
+      "properties": {
+        "guardianEmail": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "guardianPhone": { "type": "string", "minLength": 5, "maxLength": 40 },
+        "emergencyNotes": { "type": "string", "maxLength": 300 },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["guardianEmail", "guardianPhone", "emergencyNotes", "ownerId", "createdAt", "updatedAt"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Real-time daily or period student attendance status record.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "classId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "className": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "date": { "type": "string", "minLength": 10, "maxLength": 10, "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "period": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "status": { "type": "string", "enum": ["present", "tardy", "absent", "excused"] },
+        "note": { "type": "string", "maxLength": 300 },
+        "notifiedParent": { "type": "boolean" },
+        "recordedByUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "assignedTeacherId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "studentName", "classId", "className", "date", "period", "status", "note", "notifiedParent", "recordedByUid", "ownerId", "assignedTeacherId", "createdAt", "updatedAt"]
+    },
+    "ParentNotification": {
+      "title": "ParentNotification",
+      "description": "Automated or direct parent communication record and acknowledgement tracking.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "guardianName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "classId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "channel": { "type": "string", "enum": ["SMS", "Email", "App Push"] },
+        "triggerType": { "type": "string", "enum": ["auto_absence", "auto_tardy", "admission_update", "teacher_direct", "attendance_summary"] },
+        "subject": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "deliveryStatus": { "type": "string", "enum": ["queued", "sent", "delivered", "acknowledged"] },
+        "parentReply": { "type": "string", "maxLength": 500 },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "assignedTeacherId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "studentName", "guardianName", "classId", "channel", "triggerType", "subject", "message", "deliveryStatus", "parentReply", "ownerId", "assignedTeacherId", "createdAt", "updatedAt"]
+    },
+    "NotificationRule": {
+      "title": "NotificationRule",
+      "description": "Configurable automation rule for dispatching parent notifications.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "triggerEvent": { "type": "string", "enum": ["absent", "tardy", "consecutive_absences", "admission_stage_change"] },
+        "channel": { "type": "string", "enum": ["SMS", "Email", "App Push"] },
+        "delayMinutes": { "type": "number" },
+        "templateText": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "enabled": { "type": "boolean" },
+        "teacherViewerUids": { "type": "array", "description": "Bounded list (<= 50) of active Teacher/Staff UIDs allowed read-only access to school automation rules." },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "triggerEvent", "channel", "delayMinutes", "templateText", "enabled", "ownerId", "createdAt", "updatedAt"]
+    },
+    "AdmissionApplication": {
+      "title": "AdmissionApplication",
+      "description": "Prospective student admission and enrolment pipeline record.",
+      "type": "object",
+      "properties": {
+        "applicantName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "gradeApplying": { "type": "string", "minLength": 1, "maxLength": 30 },
+        "admissionYear": { "type": "number" },
+        "guardianName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "previousSchool": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "stage": { "type": "string", "enum": ["inquiry", "tour_scheduled", "documents_review", "accepted", "enrolled", "declined"] },
+        "documentsVerified": { "type": "boolean" },
+        "tuitionDepositPaid": { "type": "boolean" },
+        "interviewDate": { "type": "string", "maxLength": 32 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "targetClassId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "enrolledStudentId": { "type": "string", "maxLength": 128 },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["applicantName", "gradeApplying", "admissionYear", "guardianName", "previousSchool", "stage", "documentsVerified", "tuitionDepositPaid", "interviewDate", "notes", "targetClassId", "enrolledStudentId", "ownerId", "createdAt", "updatedAt"]
+    },
+    "AdmissionPrivateContact": {
+      "title": "AdmissionPrivateContact",
+      "description": "Isolated PII for an admission applicant family.",
+      "type": "object",
+      "properties": {
+        "guardianEmail": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "guardianPhone": { "type": "string", "minLength": 5, "maxLength": 40 },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["guardianEmail", "guardianPhone", "ownerId", "createdAt", "updatedAt"]
+    },
+    "StaffMember": {
+      "title": "StaffMember",
+      "description": "Faculty or staff member directory profile and operational performance metrics.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "roleTitle": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "department": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "staffCategory": { "type": "string", "enum": ["stakeholder", "administration", "teacher", "staff"] },
+        "employmentType": { "type": "string", "enum": ["Full-Time", "Part-Time", "Substitute"] },
+        "status": { "type": "string", "enum": ["active", "on_leave", "inactive"] },
+        "avatarUrl": { "type": "string", "maxLength": 300 },
+        "weeklyHoursTarget": { "type": "number" },
+        "assignedHours": { "type": "number" },
+        "attendanceSubmissionRate": { "type": "number" },
+        "parentResponseMinutes": { "type": "number" },
+        "observationScore": { "type": "number" },
+        "linkedUserUid": { "type": "string", "maxLength": 128 },
+        "boardViewerUids": { "type": "array", "description": "Bounded list (<= 25) of active Board member UIDs granted read-only executive access." },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "roleTitle", "department", "staffCategory", "employmentType", "status", "avatarUrl", "weeklyHoursTarget", "assignedHours", "attendanceSubmissionRate", "parentResponseMinutes", "observationScore", "ownerId", "createdAt", "updatedAt"]
+    },
+    "Department": {
+      "title": "Department",
+      "description": "Academic, administrative, operational, or governance department within a school.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "code": { "type": "string", "minLength": 2, "maxLength": 24, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "category": { "type": "string", "enum": ["Academic", "Administrative", "Operations", "Governance"] },
+        "headName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 300 },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "boardViewerUids": { "type": "array", "description": "Bounded list (<= 25) of active Board member UIDs granted read-only executive access." },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "code", "category", "headName", "description", "status", "ownerId", "createdAt", "updatedAt"]
+    },
+    "FinancialRecord": {
+      "title": "FinancialRecord",
+      "description": "School revenue, expenditure, and budget ledger entry for Super Admin and Board Financial Analytics.",
+      "type": "object",
+      "properties": {
+        "fiscalYear": { "type": "string", "minLength": 4, "maxLength": 16 },
+        "month": { "type": "string", "minLength": 7, "maxLength": 7, "pattern": "^[0-9]{4}-[0-9]{2}$" },
+        "monthLabel": { "type": "string", "minLength": 3, "maxLength": 20 },
+        "entryType": { "type": "string", "enum": ["revenue", "expense"] },
+        "category": { "type": "string", "enum": ["Tuition Fees", "Admission Fees", "Grants & Endowment", "Transport & Lab Fees", "Faculty Payroll", "Campus Operations", "Academic Resources", "Scholarships & Aid"] },
+        "department": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "amount": { "type": "number" },
+        "budgetedAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["collected", "pending", "disbursed", "scheduled"] },
+        "notes": { "type": "string", "maxLength": 300 },
+        "boardViewerUids": { "type": "array", "description": "Bounded list (<= 25) of active Board member UIDs granted read-only executive access." },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fiscalYear", "month", "monthLabel", "entryType", "category", "department", "amount", "budgetedAmount", "status", "notes", "boardViewerUids", "ownerId", "createdAt", "updatedAt"]
+    },
+    "ScheduleBlock": {
+      "title": "ScheduleBlock",
+      "description": "Weekly timetable assignment linking a staff member and class section.",
+      "type": "object",
+      "properties": {
+        "staffId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "staffName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "classId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "className": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "dayOfWeek": { "type": "string", "enum": ["Mon", "Tue", "Wed", "Thu", "Fri"] },
+        "periodNumber": { "type": "number" },
+        "startTime": { "type": "string", "minLength": 4, "maxLength": 16 },
+        "endTime": { "type": "string", "minLength": 4, "maxLength": 16 },
+        "room": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "subject": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "status": { "type": "string", "enum": ["scheduled", "conflict", "substitute_needed"] },
+        "assignedTeacherId": { "type": "string", "maxLength": 128 },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["staffId", "staffName", "classId", "className", "dayOfWeek", "periodNumber", "startTime", "endTime", "room", "subject", "status", "ownerId", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/institution/{configId}": {
+      "schema": { "$ref": "#/entities/InstitutionConfig" },
+      "description": "Public non-PII first-time setup status and school identity."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Invite-only role profiles without raw PII."
+    },
+    "/users/{userId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/UserPrivateInfo" },
+      "description": "Isolated PII subcollection for user email and phone."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminRegistry" },
+      "description": "Trusted admin role registry."
+    },
+    "/invites/{inviteId}": {
+      "schema": { "$ref": "#/entities/RoleInvite" },
+      "description": "Role-based invite records provisioned by Super Admin."
+    },
+    "/contactInquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/ContactInquiry" },
+      "description": "Public Contact Us lead capture submissions."
+    },
+    "/careerApplications/{appId}": {
+      "schema": { "$ref": "#/entities/CareerApplication" },
+      "description": "Public Career page job applications."
+    },
+    "/classes/{classId}": {
+      "schema": { "$ref": "#/entities/SchoolClass" },
+      "description": "Homeroom and subject class sections."
+    },
+    "/students/{studentId}": {
+      "schema": { "$ref": "#/entities/Student" },
+      "description": "Enrolled student directory records."
+    },
+    "/students/{studentId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/StudentGuardianPrivate" },
+      "description": "Isolated guardian PII subcollection for students."
+    },
+    "/attendanceRecords/{recordId}": {
+      "schema": { "$ref": "#/entities/AttendanceRecord" },
+      "description": "Real-time daily attendance records."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/ParentNotification" },
+      "description": "Automated and direct parent communication logs."
+    },
+    "/notificationRules/{ruleId}": {
+      "schema": { "$ref": "#/entities/NotificationRule" },
+      "description": "Automated notification trigger rules."
+    },
+    "/admissions/{applicationId}": {
+      "schema": { "$ref": "#/entities/AdmissionApplication" },
+      "description": "Admissions and enrolment pipeline records."
+    },
+    "/admissions/{applicationId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/AdmissionPrivateContact" },
+      "description": "Isolated applicant family PII subcollection."
+    },
+    "/departments/{departmentId}": {
+      "schema": { "$ref": "#/entities/Department" },
+      "description": "School academic and operational departments."
+    },
+    "/staff/{staffId}": {
+      "schema": { "$ref": "#/entities/StaffMember" },
+      "description": "Stakeholders, administration, teachers, and staff directory and performance records."
+    },
+    "/schedules/{scheduleId}": {
+      "schema": { "$ref": "#/entities/ScheduleBlock" },
+      "description": "Automated staff and classroom timetable assignments."
+    },
+    "/financialRecords/{recordId}": {
+      "schema": { "$ref": "#/entities/FinancialRecord" },
+      "description": "School revenue, expenditure, and budget records powering Financial Analytics for Super Admin and Board."
+    }
+  }
+}

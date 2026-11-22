@@ -1,0 +1,6 @@
+{
+  "name": "Kestrel Campus",
+  "description": "School operations platform for real-time student attendance, automated parent notifications, admissions & enrolment workflows, and faculty scheduling & performance reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
